@@ -1,0 +1,80 @@
+<?php
+defined('BASEPATH') OR exit('No direct script access allowed');
+
+class Peminjaman extends CI_Controller {
+
+		var $API =""; 
+
+		function __construct() {         
+			parent::__construct();         
+			$this->API="http://localhost:8080/server_uas/index.php"; 
+
+		}          
+		// menampilkan data mahasiswa     
+	function index(){         
+			$data['peminjaman'] = json_decode($this->curl->simple_get($this->API.'/peminjaman'));         
+			$this->load->view('mahasiswa/list',$data);	
+	}
+
+	public function create()
+	{
+		if (isset($_POST['submit'])) {
+			$data = array(
+				'nim' => $this->input->post('nim') ,
+				 'nama' => $this->input->post('nama'), 
+				 'id_jurusan' => $this->input->post('jurusan'),
+				'alamat' => $this->input->post('alamat'));
+			$insert = $this->curl->simple_post($this->API.'/mahasiswa', $data, array(CURLOPT_BUFFERSIZE=>10));
+			if ($insert) {
+				$this->session->set_flashdata('hasil', 'Insert Data Berhasil');
+			}else{
+				$this->session->set_flashdata('hasil', 'Insert Data Gagal');
+			}
+			redirect('mahasiswa');
+		}else{
+			$data['jurusan'] = json_decode($this->curl->simple_get($this->API.'/jurusan'));
+			$this->load->view('mahasiswa/create', $data);
+		}
+	}
+
+	public function edit()
+	{	
+		if (isset($_POST['submit'])) {
+			$data = array(
+				'nim' => $this->input->post('nim') ,
+				 'nama' => $this->input->post('nama'), 
+				 'id_jurusan' => $this->input->post('jurusan'),
+				'alamat' => $this->input->post('alamat'));
+			$update = $this->curl->simple_put($this->API.'/mahasiswa', $data, array(CURLOPT_BUFFERSIZE=>10));
+			if ($update) {
+				$this->session->set_flashdata('hasil', 'Update Data Berhasil');
+			}else{
+				$this->session->set_flashdata('hasil', 'Update Data Gagal');
+			}
+			redirect('mahasiswa');
+		}else{
+			$data['jurusan'] = json_decode($this->curl->simple_get($this->API.'/jurusan'));
+			$params = array('nim'=>$this->uri->segment(3));
+			$data['mahasiswa'] = json_decode($this->curl->simple_get($this->API.'/mahasiswa', $params));
+			$this->load->view('mahasiswa/edit', $data);
+		}	
+	}
+
+	 function delete($nim){         
+	 	if(empty($nim)){             
+	 		redirect('mahasiswa');         
+	 	}else{             
+	 		$delete =  $this->curl->simple_delete($this->API.'/mahasiswa', array('nim'=>$nim), array(CURLOPT_BUFFERSIZE => 10));              
+	 		if($delete){                 
+	 			$this->session->set_flashdata('hasil','Delete Data Berhasil');             
+	 		}else{
+	 			$this->session->set_flashdata('hasil','Delete Data Gagal');             
+	 		}
+	 		redirect('mahasiswa');         
+	 	}     
+	 } 
+
+}
+
+/* End of file Mahasiswa.php */
+/* Location: ./application/controllers/Mahasiswa.php */
